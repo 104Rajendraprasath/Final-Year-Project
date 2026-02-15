@@ -1,0 +1,35 @@
+# --- Data and Videos ---
+# Don't push your raw dataset or uploaded test videos
+Data/
+uploads/
+*.mp4
+*.avi
+*.jpeg
+*.jpg
+*.png
+
+
+
+# --- Python Environment ---
+# Don't push your virtual environment
+.venv/
+.GPUenv/
+.pretrainenv/
+.Correctenv/
+__pycache__/
+*.pyc
+
+
+
+
+
+# --- Credentials ---
+# Never push your keys or tokens
+key.txt
+.env
+Salesforce.txt
+
+vit_final_model/
+*.safetensors
+*.bin
+*.h5

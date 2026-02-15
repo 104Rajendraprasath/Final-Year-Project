@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Surveillance</title>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: monospace; padding: 20px; }
+        h1 { text-align: center; color: #58a6ff; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        .card { background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 6px; }
+        .card h3 { margin-top: 0; color: #8b949e; }
+        
+        video { width: 100%; border-radius: 4px; border: 1px solid #30363d; }
+        
+        .status { margin-top: 10px; padding: 8px; text-align: center; font-weight: bold; border-radius: 4px; background: #21262d; }
+        .safe { background: #238636; color: white; }
+        .alert { background: #da3633; color: white; animation: blink 1s infinite; }
+        
+        #logs { margin-top: 30px; border-top: 1px solid #30363d; padding-top: 20px; }
+        .log-entry { padding: 5px; border-bottom: 1px solid #21262d; color: #da3633; }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <h1>👁️ AI SURVEILLANCE COMMAND 👁️</h1>
+
+    <div class="grid">
+        {% for key, cam in cameras.items() %}
+        <div class="card" id="card-{{ key }}">
+            <h3>CAM {{ cam.id }}: {{ cam.location }}</h3>
+            <video id="vid-{{ key }}" controls></video>
+            <input type="file" id="input-{{ key }}" accept="video/*" onchange="upload('{{ key }}')" style="margin-top:10px;">
+            <div id="status-{{ key }}" class="status">System Idle</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="logs">
+        <h2>🚨 POLICE DISPATCH LOGS</h2>
+        <div id="log-container"></div>
+    </div>
+
+    <script>
+        function upload(camId) {
+            // 1. Get all necessary DOM elements
+            const input = document.getElementById(`input-${camId}`);
+            const videoPlayer = document.getElementById(`video-${camId}`);
+            const statusDiv = document.getElementById(`status-${camId}`);
+            const cardDiv = document.getElementById(`card-${camId}`);
+            const screenDiv = document.getElementById(`screen-${camId}`);
+
+            // 2. Check if a file was actually selected
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Preview the video immediately
+                videoPlayer.src = URL.createObjectURL(file);
+                
+                // Update UI to "Processing" state
+                statusDiv.innerText = "Analyzing Feed...";
+                statusDiv.className = "status-badge status-loading";
+                screenDiv.innerHTML = `<div class="camera-icon">⚙️</div><div style="color: yellow;">Processing AI...</div>`;
+
+                // Prepare Data for Backend
+                const formData = new FormData();
+                formData.append('video', file);
+                formData.append('camera_id', camId);
+
+                // 3. Send to Flask Backend API
+                fetch('/process_feed', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(">>> RESULT:", data);
+
+                    // 4. Update UI based on Result
+                    if (data.status === "ALERT") {
+                        // --- VIOLENCE CASE ---
+                        // Show: "VIOLENCE (99%)" - RED
+                        statusDiv.innerText = `🚨 ${data.label.toUpperCase()} (${data.confidence})`;
+                        statusDiv.className = "status-badge status-alert";
+                        
+                        // Update Card Border
+                        cardDiv.style.borderColor = "#da3633";
+                        cardDiv.style.boxShadow = "0 0 15px #da3633";
+                        
+                        // Update Screen Icon
+                        screenDiv.innerHTML = `<div style="font-size:50px">⚠️</div><div style="color:red; font-weight:bold">THREAT DETECTED</div>`;
+                        
+                        // Log to police dashboard
+                        addLog(data);
+                    } else {
+                        // --- SAFE CASE ---
+                        // Show: "NON-VIOLENCE (98%)" - BLUE/GREEN
+                        statusDiv.innerText = `✅ ${data.label.toUpperCase()} (${data.confidence})`;
+                        statusDiv.className = "status-badge status-safe";
+                        
+                        // Update Card Border
+                        cardDiv.style.borderColor = "#1f6feb";
+                        cardDiv.style.boxShadow = "none";
+                        
+                        // Update Screen Icon
+                        screenDiv.innerHTML = `<div style="font-size:50px">🛡️</div><div style="color:#1f6feb; font-weight:bold">Monitoring Active</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    statusDiv.innerText = "System Error";
+                    statusDiv.className = "status-badge status-idle";
+                    screenDiv.innerHTML = `<div class="camera-icon">❌</div><div style="color: gray;">Connection Failed</div>`;
+                });
+            }
+        }
+
+        // Helper function to add logs to the bottom panel
+        function addLog(data) {
+            const container = document.getElementById('alert-logs'); // Make sure this matches your HTML ID
+            
+            // Create a new log entry
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            // Format the log text
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                [${timestamp}] 
+                <strong>CAMERA:</strong> ${data.camera_id} | 
+                <strong>LOC:</strong> ${data.location} | 
+                <strong>STATUS:</strong> ${data.message} (${data.confidence})
+            `;
+            
+            // Add to the top of the list
+            if (container) {
+                container.prepend(entry);
+            }
+        }
+    </script>
+</body>
+</html>

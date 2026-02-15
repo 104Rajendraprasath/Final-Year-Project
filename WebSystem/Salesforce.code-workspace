@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../../../Salesforce"
+		},
+		{
+			"path": "../../../Vscode workspace"
+		},
+		{
+			"path": "../../spring projects"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "automatic",
+		"liveServer.settings.multiRootWorkspaceName": "Final Year Project"
+	}
+}
