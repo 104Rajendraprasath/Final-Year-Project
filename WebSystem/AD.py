@@ -146,7 +146,7 @@ def analyze_video(video_path):
 
 @app.route('/')
 def index():
-    return render_template('indexOld.html', cameras=CAMERAS)
+    return render_template('indexAD.html', cameras=CAMERAS)
 
 @app.route('/process_feed', methods=['POST'])
 def process_feed():

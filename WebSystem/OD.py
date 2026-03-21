@@ -189,8 +189,8 @@ def process_feed():
         message = "No Weapons Found"
 
     print(f"[INFO] Finished. Result: {status} | Objects: {weapons_str}")
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    # if os.path.exists(filepath):
+    #     os.remove(filepath)
     return jsonify({
         "status": status,
         "weapons": weapons_str,
@@ -199,40 +199,7 @@ def process_feed():
         "confidence": "Object Match",
         "camera_id": camera_key
     })
-    start_time = time.time()
-    file = request.files['video']
-    camera_key = request.form['camera_id']
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(filepath)
-
-    print(f"[INFO] Object Scan started for {camera_key}...")
-    weapons = analyze_video_objects(filepath)
-    
-
-    camera_info = CAMERAS.get(camera_key, {"location": "Unknown"})
-    process_time = time.time() - start_time
-    
-    if weapons:
-        status = "ALERT"
-        weapons_str = ", ".join(weapons)
-        message = f"WEAPON DETECTED: {weapons_str}"
-        # Trigger Cloud Alert
-        #send_to_salesforce(camera_key, camera_info['location'], weapons_str,filepath)
-    else:
-        status = "SAFE"
-        weapons_str = "NONE"
-        message = "No Weapons Found"
-
-    print(f"[INFO] Scan finished in {process_time:.2f}s. Result: {status}")
-    os.remove(filepath)
-    return jsonify({
-        "status": status,
-        "weapons": weapons_str,
-        "message": message,
-        "location": camera_info['location'],
-        "confidence": "Object Match",
-        "camera_id": camera_key
-    })
+ 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
