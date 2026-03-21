@@ -28,14 +28,7 @@ OBJECT_MODEL_ID = "/media/rajendraprasath-m/New Volume/Projects/Final Year Proje
 # 3. Salesforce login URL
 SF_LOGIN_URL="https://uce3-dev-ed.develop.my.salesforce.com/services/oauth2/token"
 
-# Camera Setup
-# CAMERAS = {
-#     "cam1": {"id": 1, "location": "Main Entrance - North Gate"},
-#     "cam2": {"id": 2, "location": "Parking Lot B (Underground)"},
-#     "cam3": {"id": 3, "location": "Lobby Area"},
-#     "cam4": {"id": 4, "location": "Cafeteria Hallway"},
-#     "cam5": {"id": 5, "location": "Back Alley / Loading Dock"}
-# }
+
 CAMERAS = {
     "cam1": {"id": 1, "location": "Main Entrance", "lat": 12.9716, "lng": 77.5946}, # Example: Bangalore
     "cam2": {"id": 2, "location": "Parking Lot B", "lat": 13.0827, "lng": 80.2707}, # Example: Chennai
@@ -80,9 +73,6 @@ def send_to_salesforce(camera_id, location, confidence, threat_type, weapons,vid
         auth_response = requests.post(SF_LOGIN_URL, data=payload)
         
 
-        #print("STATUS CODE:", auth_response.status_code)
-        #print("RAW RESPONSE:", auth_response.text)
-
         auth_data = auth_response.json()
         
 
@@ -120,57 +110,6 @@ def send_to_salesforce(camera_id, location, confidence, threat_type, weapons,vid
         print("[SALESFORCE ERROR]", e)
         return False
 
-
-# # --- HYBRID ANALYSIS ENGINE ---
-#     def analyze_video_hybrid(video_path):
-#         vs = cv2.VideoCapture(video_path)
-#         fps = vs.get(cv2.CAP_PROP_FPS) or 30
-        
-#         # Analyze 1 frame every 1.5 seconds to balance speed/accuracy
-#         frame_interval = int(fps * 1.5) 
-#         frame_count = 0
-        
-#         violence_found = False
-#         max_action_conf = 0.0
-#         detected_weapons = set()
-        
-#         # Zero-Shot labels for Indian Context
-#         threat_labels = ["knife","axe","machete","rod","rifle","pistol"]
-
-#         while True:
-#             ret, frame = vs.read()
-#             if not ret: break
-            
-#             frame_count += 1
-#             if frame_count % frame_interval == 0:
-#                 # --- 1. ACTION DETECTION (ViT) ---
-#                 vit_frame = cv2.resize(frame, (224, 224))
-#                 img_rgb = cv2.cvtColor(vit_frame, cv2.COLOR_BGR2RGB)
-#                 inputs = action_processor(images=Image.fromarray(img_rgb), return_tensors="pt").to("cuda" if device == 0 else "cpu")
-                
-#                 with torch.no_grad():
-#                     outputs = action_model(**inputs)
-#                     probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-#                     score, pred_idx = torch.max(probs, dim=-1)
-                
-#                 if id2label[pred_idx.item()] == violence_label_name and score.item() > 0.65:
-#                     violence_found = True
-#                     max_action_conf = max(max_action_conf, score.item())
-
-#                 # --- 2. WEAPON DETECTION (OWL-ViT) ---
-#                 # Resize for speed (Critical for OWL-ViT)
-#                 owl_frame = cv2.resize(frame, (480, 480))
-#                 owl_rgb = cv2.cvtColor(owl_frame, cv2.COLOR_BGR2RGB)
-                
-#                 # Using low threshold (0.12) because Zero-Shot is very strict
-#                 obj_results = object_detector(Image.fromarray(owl_rgb), candidate_labels=threat_labels, threshold=0.12)
-                
-#                 for res in obj_results:
-#                     detected_weapons.add(res['label'].upper())
-
-#         vs.release()
-#         weapons_str = ", ".join(detected_weapons) if detected_weapons else ""
-#         return violence_found, max_action_conf, weapons_str
 def analyze_video_hybrid(video_path):
     vs = cv2.VideoCapture(video_path)
     fps = vs.get(cv2.CAP_PROP_FPS) or 30

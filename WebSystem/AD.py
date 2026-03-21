@@ -1,4 +1,6 @@
+import base64
 import os
+import threading
 import cv2
 import torch
 import shutil
@@ -23,17 +25,18 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Path to your ViT fine-tuned ViT model
 ViT_MODEL_PATH = "/media/rajendraprasath-m/New Volume/Projects/Final Year Project/WebSystem/Models/vit_final_model" 
 YOLO_MODEL_PATH="/media/rajendraprasath-m/New Volume/Projects/Final Year Project/WebSystem/Models/yolo_weapon_model_fine.pt"
-SF_ORG_ALIAS = "myGPUOrg"
+
 SF_LOGIN_URL="https://uce3-dev-ed.develop.my.salesforce.com/services/oauth2/token"
-WEAPON_CLASSES = ["gun", "knife", "pistol", "rifle", "weapon"]
+
 # Camera Setup
 CAMERAS = {
-    "cam1": {"id": 1, "location": "Main Entrance - North Gate"},
-    "cam2": {"id": 2, "location": "Parking Lot B (Underground)"},
-    "cam3": {"id": 3, "location": "Lobby Area"},
-    "cam4": {"id": 4, "location": "Cafeteria Hallway"},
-    "cam5": {"id": 5, "location": "Back Alley / Loading Dock"}
+    "cam1": {"id": 1, "location": "Main Entrance", "lat": 12.9716, "lng": 77.5946}, # Example: Bangalore
+    "cam2": {"id": 2, "location": "Parking Lot B", "lat": 13.0827, "lng": 80.2707}, # Example: Chennai
+    "cam3": {"id": 3, "location": "Lobby Area", "lat": 19.0760, "lng": 72.8777},    # Example: Mumbai
+    "cam4": {"id": 4, "location": "Cafeteria", "lat": 28.6139, "lng": 77.2090},     # Example: Delhi
+    "cam5": {"id": 5, "location": "Back Alley", "lat": 22.5726, "lng": 88.3639}     # Example: Kolkata
 }
+
 
 # --- LOAD AI MODELS ---
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -47,32 +50,24 @@ try:
     model.eval()
     id2label = model.config.id2label
     violence_label_name = next((n for n in id2label.values() if "viol" in n.lower() and "non" not in n.lower()), "Violence")
-
-    # 2. Load Object Model (YOLOv8 - better for weapons than DETR)
-    print(f"[INFO] Loading Object Model (YOLOv8)...")
-    object_model = YOLO(YOLO_MODEL_PATH) # Standard model detects knives; can replace with custom weights
-    ##if(object_model.):
-        ##print("Error happens in loading yolo model")
     print(f"[SUCCESS] All models loaded. Target Label: {violence_label_name}")
 except Exception as e:
     print(f"[CRITICAL ERROR] AI Setup failed: {e}")
 
 # --- SALESFORCE CONNECTOR ---
-def send_to_salesforce(camera_id, location, confidence, threat_type, weapons):
+def send_to_salesforce(camera_id, location, confidence, threat_type,video_path):
     try:
         print("[SALESFORCE] Authenticating with OAuth...")
 
         payload = {
             "grant_type": "client_credentials",
-            
+            "client_id":os.getenv("SF_CONSUMER_KEY"),
+            "client_secret":os.getenv("SF_CONSUMER_SECRET")
           }
+
 
         auth_response = requests.post(SF_LOGIN_URL, data=payload)
         
-
-        #print("STATUS CODE:", auth_response.status_code)
-        #print("RAW RESPONSE:", auth_response.text)
-
         auth_data = auth_response.json()
         
 
@@ -80,15 +75,29 @@ def send_to_salesforce(camera_id, location, confidence, threat_type, weapons):
         instance_url = auth_data["instance_url"]
 
         sf = Salesforce(instance_url=instance_url, session_id=access_token)
+        with open(video_path, "rb") as f:
+            encoded_video = base64.b64encode(f.read()).decode('utf-8')
 
+        content_version = sf.ContentVersion.create({
+            'Title': f'Evidence_{camera_id}_{datetime.now().strftime("%H%M%S")}',
+            'PathOnClient': 'evidence.mp4',
+            'VersionData': encoded_video,
+            'IsMajorVersion': True
+        })
+
+        camera_info = CAMERAS.get(camera_id, {"location": "Unknown"})
+        video_version_id = content_version['id']
         sf.Security_Alert__c.create({
             "Camera_ID__c": camera_id,
             "Location__c": location,
             "Confidence__c": float(confidence * 100),
             "Status__c": "New",
             "Threat_Type__c": threat_type,
-            "Weapon__c":weapons
+            'Video_ID__c': video_version_id,
+            'Latitude__c': camera_info['lat'],
+            'Longitude__c': camera_info['lng'],
         })
+
 
         print("[SUCCESS] Salesforce Record Created")
         return True
@@ -115,22 +124,7 @@ def analyze_video(video_path):
         
         frame_count += 1
         if frame_count % frame_interval == 0:
-            # --- 1. WEAPON DETECTION (YOLO) ---
-            # Checks for 'knife', 'scissors', etc.
-            obj_results = object_model(frame, conf=0.4, verbose=False)
-            for r in obj_results:
-                for box in r.boxes:
-                    #cls_name = object_model.names[int(box.cls[0])]
-                    class_id = int(box.cls[0])
-                    confidence = float(box.conf[0])
 
-                    label = object_model.names[class_id]
-
-                    detected_weapons.add(label)
-                    #if cls_name in ['knife','pistol']: # Base COCO weapon classes
-                        #detected_weapons.add(cls_name.upper())
-
-            # --- 2. ACTION DETECTION (ViT) ---
             frame_resized = cv2.resize(frame, (224, 224))
             img_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
             inputs = processor(images=Image.fromarray(img_rgb), return_tensors="pt").to(device)
@@ -146,14 +140,13 @@ def analyze_video(video_path):
                 max_confidence = max(max_confidence, score.item())
 
     vs.release()
-    weapons_str = ", ".join(detected_weapons) if detected_weapons else ""
-    return violence_found, max_confidence, weapons_str
+    return violence_found, max_confidence
 
 # --- ROUTES ---
 
 @app.route('/')
 def index():
-    return render_template('index.html', cameras=CAMERAS)
+    return render_template('indexOld.html', cameras=CAMERAS)
 
 @app.route('/process_feed', methods=['POST'])
 def process_feed():
@@ -163,19 +156,26 @@ def process_feed():
     file.save(filepath)
 
     print(f"[INFO] Analyzing {camera_key}...")
-    is_violent, confidence, weapons = analyze_video(filepath)
-    os.remove(filepath)
+    is_violent, confidence= analyze_video(filepath)
 
     camera_info = CAMERAS.get(camera_key, {"location": "Unknown"})
     
     # ALERT LOGIC: Trigger if Violence Found OR Weapon Found
-    if is_violent or weapons != "":
+    if is_violent:
         status = "ALERT"
-        threat_type = f"Violence ({confidence:.0%})" if is_violent else ""
-        if weapons: threat_type += f" | WEAPON: {weapons}"
+        threat_type= f"Violence ({confidence:.0%})" if is_violent else ""
+        
         
         # Trigger Salesforce Cloud Alert
-        send_to_salesforce(camera_key, camera_info['location'], confidence, threat_type,weapons)
+        thread = threading.Thread(target=send_to_salesforce, args=(
+            camera_key, 
+            camera_info['location'], 
+            confidence, 
+            threat_type, 
+            filepath
+        ))
+        thread.start()
+        print(f"[INFO] Local Analysis Complete. Salesforce upload pushed to background thread.")
     else:
         status = "SAFE"
         threat_type = "Normal Activity"
@@ -183,7 +183,6 @@ def process_feed():
     return jsonify({
         "status": status,
         "label": "Violence" if is_violent else "NonViolence",
-        "weapons": weapons if weapons else "NONE",
         "message": threat_type,
         "location": camera_info['location'],
         "confidence": f"{confidence:.2%}" if is_violent else "N/A",
@@ -191,4 +190,4 @@ def process_feed():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000,debug=True)
