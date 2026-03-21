@@ -1,0 +1,10 @@
+<template>
+    <lightning-card title="Incident Location" icon-name="standard:location">
+        <template if:true={mapMarkers}>
+            <lightning-map 
+                map-markers={mapMarkers} 
+                zoom-level="15">
+            </lightning-map>
+        </template>
+    </lightning-card>
+</template>

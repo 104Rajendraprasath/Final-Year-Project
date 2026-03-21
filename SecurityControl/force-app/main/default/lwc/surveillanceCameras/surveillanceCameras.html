@@ -1,0 +1,54 @@
+<template>
+    <div class="dashboard-container">
+
+        <div class="slds-grid slds-wrap slds-gutters">
+
+            <!-- ✅ MAP COLUMN -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_3-of-4 slds-m-bottom_small">
+                <lightning-card title="Global Security Map" icon-name="standard:location">
+                    <div class="map-wrapper">
+                        <lightning-map 
+                            map-markers={mapMarkers} 
+                            center={mapCenter}
+                            selected-marker-value={selectedMarkerValue}
+                            zoom-level="15"
+                            markers-title="Camera Locations"
+                            list-view="hidden">
+                        </lightning-map>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- ✅ LIST COLUMN -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-4">
+                <lightning-card title="Surveillance Nodes" icon-name="standard:service_resource">
+                    <div class="slds-p-horizontal_small scrollable-list">
+                        <template for:each={cameras} for:item="cam">
+                            <div key={cam.id} 
+                                 class={cam.listClass} 
+                                 onclick={handleLocationClick} 
+                                 data-id={cam.id}>
+                                
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <div class="slds-m-right_small">
+                                        <lightning-icon 
+                                            icon-name={cam.iconName} 
+                                            size="small" 
+                                            variant={cam.iconVariant}>
+                                        </lightning-icon>
+                                    </div>
+                                    <div>
+                                        <div class="slds-text-title_bold">{cam.location}</div>
+                                        <div class="slds-text-body_small">{cam.statusText}</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </template>
+                    </div>
+                </lightning-card>
+            </div>
+
+        </div>
+    </div>
+</template>

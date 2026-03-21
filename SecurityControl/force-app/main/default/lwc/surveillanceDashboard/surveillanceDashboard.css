@@ -1,0 +1,51 @@
+.cam-card {
+    background: #f3f3f3;
+    border: 2px solid #dddbda;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+}
+
+.threat-card {
+    background: #fff1f0;
+    border: 2px solid #ba0517;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(186, 5, 23, 0.3);
+}
+
+.status-label {
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 4px;
+    display: inline-block;
+    width: 100%;
+}
+/* Default height for mobile */
+.map-container {
+    height: 300px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Height for laptop/desktop */
+@media (min-width: 1024px) {
+    .map-container {
+        height: 600px;
+    }
+}
+
+/* Ensure cards look good on mobile */
+.cam-card, .threat-card {
+    margin: 5px 0;
+    padding: 20px;
+    min-width: 100%; /* Fixes the thin vertical look */
+}
+
+
+.status-safe { background: #dff1e0; color: #2e844a; }
+.status-alert { background: #ba0517; color: white; animation: pulse 1s infinite; }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }

@@ -1,0 +1,80 @@
+/* Main Container */
+.dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+}
+
+/* SLDS Grid Fix */
+.slds-grid {
+    flex: 1;
+    height: 100%;
+}
+
+.slds-col {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Map Section */
+.map-wrapper {
+    flex: 1;              /* Fill available space */
+    display: flex;
+}
+
+.map-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+/* If using iframe or map div */
+.map-container iframe,
+.map-container .map {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Sidebar List */
+.scrollable-list {
+    flex: 1;              /* Fill remaining height */
+    overflow-y: auto;
+}
+
+/* List Items */
+.location-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    cursor: pointer;
+    background: white;
+}
+
+/* State Classes */
+.state-safe { 
+    border-left: 6px solid #2e844a; 
+}
+
+.state-alert { 
+    background-color: #fff1f0; 
+    border-left: 6px solid #ba0517; 
+    animation: pulse 2s infinite; 
+}
+
+/* Animation */
+@keyframes pulse {
+    0% { background-color: #fff1f0; }
+    50% { background-color: #ffd0cf; }
+    100% { background-color: #fff1f0; }
+}
+
+/* Mobile Fix */
+@media (max-width: 768px) {
+    .slds-col {
+        height: auto;
+    }
+}

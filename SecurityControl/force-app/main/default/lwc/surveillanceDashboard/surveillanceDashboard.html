@@ -1,0 +1,46 @@
+<template>
+    <lightning-card title="AI SURVEILLANCE CONTROL ROOM" icon-name="custom:custom102">
+        <div class="slds-p-around_medium">
+            <!-- 5 Camera Grid -->
+           <div class="slds-grid slds-wrap slds-gutters">
+           <template for:each={cameras} for:item="cam">
+           <div key={cam.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_medium">
+            <div class={cam.cardClass}>
+                <!-- Card content here -->
+                <div class="slds-text-heading_small"><b>CAM {cam.id}</b></div>
+                <p>📍 {cam.location}</p>
+                <div class={cam.statusClass}>{cam.statusText}</div>
+                            
+                            <template if:true={cam.hasThreat}>
+                            <div class="slds-m-top_small slds-text-color_error">
+                                <strong>Threat:</strong> {cam.message}<br/>
+                                <strong>Confidence:</strong> {cam.confidence}%
+                                <template if:true={cam.weapon}>
+                                    <div>
+                                        <Strong>Weapon:</Strong>{cam.weapon}<br/>
+                                    </div>
+                                </template>
+                            </div>
+    
+                          <!-- NEW: Video Preview -->
+                                <template if:true={cam.videoUrl}>
+                                    <div class="slds-m-top_x-small">
+                                        <video src={cam.videoUrl} controls autoplay muted 
+                                            style="width:100%; border-radius:4px; border:1px solid red;">
+                                        </video>
+                                    </div>
+                                </template>
+                            </template>
+                            <!-- <template if:true={cam.hasThreat}>
+                                <div class="slds-m-top_small slds-text-color_error">
+                                    <strong>Threat:</strong> {cam.message}<br/>
+                                    <strong>Confidence:</strong> {cam.confidence}%
+                                </div>
+                            </template> -->
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>
