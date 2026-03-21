@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Surveillance Hub | Object Intelligence</title>
+    <style>
+        /* --- Root Styles & Theme --- */
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; margin: 0; }
+        h1 { text-align: center; color: #ff7b72; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; border-bottom: 1px solid #30363d; padding-bottom: 15px; }
+        
+        /* --- Grid Layout --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        
+        /* --- Camera Card Styling --- */
+        .card { 
+            background: #161b22; 
+            border: 2px solid #30363d; 
+            padding: 15px; 
+            border-radius: 12px; 
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h3 { margin: 0 0 10px 0; color: #8b949e; font-size: 0.85rem; display: flex; justify-content: space-between; }
+        .loc-text { color: #ff7b72; font-style: italic; }
+
+        /* --- Video & Overlay Section --- */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363d;
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .screen-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.8); text-align: center; z-index: 5; pointer-events: none;
+        }
+
+        /* --- Status Indicators --- */
+        .status-badge { 
+            margin-top: 15px; padding: 10px; text-align: center; 
+            font-weight: bold; border-radius: 6px; background: #21262d; 
+            font-size: 0.9rem; text-transform: uppercase;
+        }
+
+        .status-loading { color: #e3b341; border: 1px solid #e3b341; animation: pulse 1.5s infinite; }
+        .status-safe { background: #238636; color: white; box-shadow: 0 4px 10px rgba(35, 134, 54, 0.3); }
+        .status-alert { background: #da3633; color: white; animation: blink 1s infinite; box-shadow: 0 0 15px #da3633; }
+
+        .object-list {
+            margin-top: 8px; font-size: 0.75rem; color: #8b949e; 
+            padding: 5px; background: rgba(255,255,255,0.05); border-radius: 4px;
+            text-align: center; min-height: 20px;
+        }
+
+        /* --- Buttons & Inputs --- */
+        .upload-btn {
+            display: block; width: 100%; background: #21262d; color: #c9d1d9;
+            border: 1px solid #30363d; padding: 10px; margin-top: 12px;
+            cursor: pointer; border-radius: 6px; font-weight: bold;
+        }
+        .upload-btn:hover { background: #30363d; color: #ff7b72; }
+
+        /* --- Logs Section --- */
+        #logs { margin-top: 40px; border-top: 2px solid #30363d; padding-top: 20px; }
+        .log-container { max-height: 300px; overflow-y: auto; border: 1px solid #21262d; border-radius: 8px; }
+        .log-entry { padding: 12px; border-bottom: 1px solid #21262d; font-size: 0.8rem; display: flex; align-items: center; }
+        .log-alert { background: rgba(218, 54, 51, 0.1); color: #ff7b72; border-left: 4px solid #da3633; }
+        .log-safe { color: #8b949e; border-left: 4px solid #238636; }
+
+        /* --- Animations --- */
+        @keyframes blink { 50% { opacity: 0.8; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>👁️ Smart Surveillance: Object Intelligence 👁️</h1>
+
+    <div class="grid">
+        {% for key, cam in cameras.items() %}
+        <div class="card" id="card-{{ key }}">
+            <h3>
+                <span>CAM {{ cam.id }}</span>
+                <span class="loc-text">📍 {{ cam.location }}</span>
+            </h3>
+            
+            <div class="video-container">
+                <video id="video-{{ key }}" muted loop></video>
+                <div id="screen-{{ key }}" class="screen-overlay"></div>
+            </div>
+
+            <!-- Weapon Detection Status -->
+            <div id="status-{{ key }}" class="status-badge">Scanner Ready</div>
+            <div id="weapon-list-{{ key }}" class="object-list">No Objects Detected</div>
+            
+            <button class="upload-btn" onclick="document.getElementById('input-{{ key }}').click()">
+                📂 Scan Video for Weapons
+            </button>
+            <input type="file" id="input-{{ key }}" accept="video/*" onchange="upload('{{ key }}')" style="display:none;">
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="logs">
+        <h2>🚨 WEAPON DISPATCH & CLOUD LOGS (Salesforce)</h2>
+        <div id="log-container" class="log-container">
+            <div style="padding: 20px; text-align: center; color: #484f58;">No weapon sightings recorded.</div>
+        </div>
+    </div>
+
+    <script>
+        function upload(camId) {
+            const input = document.getElementById(`input-${camId}`);
+            const video = document.getElementById(`video-${camId}`);
+            const status = document.getElementById(`status-${camId}`);
+            const card = document.getElementById(`card-${camId}`);
+            const screen = document.getElementById(`screen-${camId}`);
+            const weaponList = document.getElementById(`weapon-list-${camId}`);
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                video.src = URL.createObjectURL(file);
+                video.play();
+                
+                // --- LOADING STATE ---
+                screen.style.display = "flex";
+                screen.innerHTML = `<div style="font-size:30px">🔍</div><div style="color: #e3b341; font-weight:bold; margin-top:10px;">SCANNING FOR LETHAL OBJECTS...</div>`;
+                status.innerText = "Analyzing Frame Geometry...";
+                status.className = "status-badge status-loading";
+                weaponList.innerText = "Processing Transformer Attention...";
+
+                const formData = new FormData();
+                formData.append('video', file);
+                formData.append('camera_id', camId);
+
+                // --- API REQUEST ---
+                fetch('/process_feed', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(">>> Object Result for " + camId + ":", data);
+
+                    if (data.status === "ALERT") {
+                        // --- WEAPON DETECTED ---
+                        status.className = "status-badge status-alert";
+                        status.innerText = `🚨 WEAPON IDENTIFIED`;
+                        weaponList.innerHTML = `<span style="color:#ff7b72; font-weight:bold;">FOUND: ${data.weapons}</span>`;
+                        card.style.borderColor = "#da3633";
+                        
+                        screen.innerHTML = `<div style="font-size:50px">🗡️</div><div style="color:#ff7b72; font-weight:bold; font-size:1.2rem;">LETHAL THREAT</div><div style="font-size:0.8rem; color:white;">${data.weapons}</div>`;
+                        
+                        addLog(data, true);
+                    } else {
+                        // --- AREA SAFE ---
+                        status.className = "status-badge status-safe";
+                        status.innerText = "✅ NO WEAPONS FOUND";
+                        weaponList.innerText = "Area Secure";
+                        card.style.borderColor = "#238636";
+                        
+                        screen.innerHTML = `<div style="font-size:50px">🛡️</div><div style="color:#3fb950; font-weight:bold;">CLEAN SCAN</div>`;
+                        
+                        // Hide safe icon after 4 seconds to show the video
+                        setTimeout(() => { screen.style.display = "none"; }, 4000);
+                        addLog(data, false);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    status.innerText = "Scanner Offline";
+                    status.className = "status-badge";
+                    weaponList.innerText = "Connection Failed";
+                    screen.innerHTML = `<div style="font-size:30px">❌</div>`;
+                });
+            }
+        }
+
+        function addLog(data, isAlert) {
+            const container = document.getElementById('log-container');
+            
+            // Remove the placeholder if it exists
+            if (container.children.length === 1 && container.children[0].style.color === "rgb(72, 79, 88)") {
+                container.innerHTML = "";
+            }
+
+            const entry = document.createElement('div');
+            entry.className = isAlert ? 'log-entry log-alert' : 'log-entry log-safe';
+            
+            const time = new Date().toLocaleTimeString();
+            const icon = isAlert ? "⚠️" : "✅";
+
+            entry.innerHTML = `
+                <div style="font-size:1.2rem; margin-right:15px;">${icon}</div>
+                <div>
+                    <strong>[${time}] CAM: ${data.camera_id.toUpperCase()}</strong> - ${data.location} <br>
+                    <span>Result: ${data.message} | System Status: Verified via Cloud</span>
+                </div>
+            `;
+            
+            container.prepend(entry);
+        }
+    </script>
+</body>
+</html>
