@@ -6,13 +6,73 @@ export default class SurveillanceCameras extends LightningElement {
     @track mapMarkers = [];
     @track selectedMarkerValue; // New variable to track selection
     
-    @track cameras = [
-        { id: 'cam1', location: 'Main Entrance', lat: 12.9716, lng: 77.5946, statusText: 'Normal', hasThreat: false, iconName: 'utility:check', iconVariant: 'success', listClass: 'location-item state-safe' },
-        { id: 'cam2', location: 'Parking Lot B', lat: 13.0827, lng: 80.2707, statusText: 'Normal', hasThreat: false, iconName: 'utility:check', iconVariant: 'success', listClass: 'location-item state-safe' },
-        { id: 'cam3', location: 'Lobby Area', lat: 19.0760, lng: 72.8777, statusText: 'Normal', hasThreat: false, iconName: 'utility:check', iconVariant: 'success', listClass: 'location-item state-safe' },
-        { id: 'cam4', location: 'Cafeteria', lat: 28.6139, lng: 77.2090, statusText: 'Normal', hasThreat: false, iconName: 'utility:check', iconVariant: 'success', listClass: 'location-item state-safe' },
-        { id: 'cam5', location: 'Back Alley', lat: 22.5726, lng: 88.3639, statusText: 'Normal', hasThreat: false, iconName: 'utility:check', iconVariant: 'success', listClass: 'location-item state-safe' }
-    ];
+   @track cameras = [
+    { 
+        id: 'cam1', 
+        location: 'Rockfort Temple Entrance', 
+        lat: 10.8271, 
+        lng: 78.6970, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam2', 
+        location: 'Central Bus Stand', 
+        lat: 10.7933, 
+        lng: 78.6811, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam3', 
+        location: 'Chathiram Bus Stand', 
+        lat: 10.8296, 
+        lng: 78.6917, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam4', 
+        location: 'Srirangam Temple - North Tower', 
+        lat: 10.8647, 
+        lng: 78.6902, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam5', 
+        location: 'Anna Nagar Main Road', 
+        lat: 10.8030, 
+        lng: 78.6900, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    }
+];
 
     connectedCallback() {
         this.initMarkers();

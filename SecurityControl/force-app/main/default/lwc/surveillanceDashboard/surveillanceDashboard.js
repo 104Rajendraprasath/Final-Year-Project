@@ -2,13 +2,73 @@ import { LightningElement, track } from 'lwc';
 import getLatestAlerts from '@salesforce/apex/SecurityDashboardController.getLatestAlerts';
 
 export default class SurveillanceDashboard extends LightningElement {
-    @track cameras = [
-        { id: 'cam1', location: 'Main Entrance', statusText: 'Online', cardClass: 'cam-card', statusClass: 'status-label status-safe', hasThreat: false },
-        { id: 'cam2', location: 'Parking Lot B', statusText: 'Online', cardClass: 'cam-card', statusClass: 'status-label status-safe', hasThreat: false },
-        { id: 'cam3', location: 'Lobby Area', statusText: 'Online', cardClass: 'cam-card', statusClass: 'status-label status-safe', hasThreat: false },
-        { id: 'cam4', location: 'Cafeteria', statusText: 'Online', cardClass: 'cam-card', statusClass: 'status-label status-safe', hasThreat: false },
-        { id: 'cam5', location: 'Back Alley', statusText: 'Online', cardClass: 'cam-card', statusClass: 'status-label status-safe', hasThreat: false }
-    ];
+   @track cameras = [
+    { 
+        id: 'cam1', 
+        location: 'Rockfort Temple Entrance', 
+        lat: 10.8271, 
+        lng: 78.6970, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam2', 
+        location: 'Central Bus Stand', 
+        lat: 10.7933, 
+        lng: 78.6811, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam3', 
+        location: 'Chathiram Bus Stand', 
+        lat: 10.8296, 
+        lng: 78.6917, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam4', 
+        location: 'Srirangam Temple - North Tower', 
+        lat: 10.8647, 
+        lng: 78.6902, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    },
+    { 
+        id: 'cam5', 
+        location: 'Anna Nagar Main Road', 
+        lat: 10.8030, 
+        lng: 78.6900, 
+        statusText: 'Normal', 
+        hasThreat: false, 
+        iconName: 'utility:check', 
+        iconVariant: 'success', 
+        listClass: 'location-item state-safe',
+        cardClass: 'cam-card',
+        statusClass: 'status-label status-safe'
+    }
+];
 
     timer;
 

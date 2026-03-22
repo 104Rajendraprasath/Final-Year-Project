@@ -30,12 +30,13 @@ SF_LOGIN_URL="https://uce3-dev-ed.develop.my.salesforce.com/services/oauth2/toke
 
 
 CAMERAS = {
-    "cam1": {"id": 1, "location": "Main Entrance", "lat": 12.9716, "lng": 77.5946}, # Example: Bangalore
-    "cam2": {"id": 2, "location": "Parking Lot B", "lat": 13.0827, "lng": 80.2707}, # Example: Chennai
-    "cam3": {"id": 3, "location": "Lobby Area", "lat": 19.0760, "lng": 72.8777},    # Example: Mumbai
-    "cam4": {"id": 4, "location": "Cafeteria", "lat": 28.6139, "lng": 77.2090},     # Example: Delhi
-    "cam5": {"id": 5, "location": "Back Alley", "lat": 22.5726, "lng": 88.3639}     # Example: Kolkata
+    "cam1": {"id": 1, "location": "Rockfort Temple Entrance", "lat": 10.8271, "lng": 78.6970},
+    "cam2": {"id": 2, "location": "Central Bus Stand", "lat": 10.7933, "lng": 78.6811},
+    "cam3": {"id": 3, "location": "Chathiram Bus Stand", "lat": 10.8296, "lng": 78.6917},
+    "cam4": {"id": 4, "location": "Srirangam Temple - North Tower", "lat": 10.8647, "lng": 78.6902},
+    "cam5": {"id": 5, "location": "Anna Nagar Main Road", "lat": 10.8030, "lng": 78.6900}
 }
+
 
 # --- LOAD AI MODELS ---
 device = 0 if torch.cuda.is_available() else -1

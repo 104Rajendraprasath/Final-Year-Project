@@ -1,0 +1,13 @@
+.video-container {
+    width: 100%;
+    background: black;
+    border-radius: 8px;
+    line-height: 0;
+}
+
+.evidence-video {
+    width: 100%;
+    max-height: 400px;
+    border: 2px solid #ba0517;
+    border-radius: 8px;
+}

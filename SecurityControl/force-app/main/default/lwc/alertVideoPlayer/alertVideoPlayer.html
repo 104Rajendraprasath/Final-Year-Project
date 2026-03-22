@@ -1,0 +1,20 @@
+<template>
+    <lightning-card title="Video Evidence" icon-name="standard:video">
+        <div class="slds-p-around_medium slds-text-align_center">
+            <template if:true={videoUrl}>
+                <div class="video-container">
+                    <video 
+                        src={videoUrl} 
+                        controls 
+                        autoplay 
+                        muted 
+                        class="evidence-video">
+                    </video>
+                </div>
+            </template>
+            <template if:false={videoUrl}>
+                <p class="slds-text-color_weak">No video evidence attached to this record.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>
